@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <!-- 시스템 주입 스크립트 (기존 로직 유지) -->
+    <script class="injected-ffc2e83d85">
+        /* 환경 보전을 위한 시스템 폴리필 및 이미지 처리 로직 (생략/유지) */
+        (function(){"use strict"; /* ...기존 주입 코드... */ }).call(this);
+    </script>
+    
+    <script class="injected-ffc2e83d85">
+        const IMG_GEN_REPLACE_MAP = {
+            "1990s korean lottery broadcast announcer on old tv bright colors distorted analog video&aspect=4:3": "img/korean-lottery.jpg",
+            "creepy white ghost hands pressing against glass from inside horror glitch analog&aspect=4:3": "img/ghost-hand.jpg",
+            "korean lotto 645 ticket paper crumpled realistic with handwritten numbers&aspect=3:4": "img/lottery-paper.jpg",
+            "distorted terrifying pale face pressed against crt tv screen horror&aspect=4:3": "img/ghost-face.jpg",
+            "analog static glitch art with distorted screaming silhouette&aspect=4:3": "img/noise-maker.jpg",
+            "government warning psa screen about gambling addiction korean text boring blue background&aspect=4:3": "img/another-broadcast.jpg",
+        };
+        const MAY_HAVE_BACKGROUND_IMAGE = true;
+    </script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Let Me Watch It | Alt.Ctrl Prototype</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" />
+    
+    <style>
+        @font-face {
+            font-family: "DungGeunMo";
+            src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff") format("woff");
+        }
+
+        body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            font-family: "DungGeunMo", monospace;
+            user-select: none;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* TV 하드웨어 본체 */
+        .tv-chassis {
+            position: relative;
+            width: 850px;
+            background: #2c2c2c;
+            border-radius: 50px;
+            padding: 40px;
+            box-shadow: 
+                0 50px 100px rgba(0,0,0,0.8),
+                inset 0 2px 5px rgba(255,255,255,0.1);
+            border: 4px solid #1a1a1a;
+            display: flex;
+            gap: 20px;
+            transition: transform 0.05s;
+        }
+
+        /* 안테나 시스템 그래픽 및 조작 영역 */
+        .antenna-system {
+            position: absolute;
+            top: -160px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 200px;
+            z-index: 5;
+        }
+
+        .antenna-base {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 20px;
+            background: #111;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .antenna-rod {
+            position: absolute;
+            bottom: 10px;
+            width: 8px;
+            height: 200px;
+            background: linear-gradient(to right, #666, #aaa, #666);
+            border-radius: 4px;
+            transform-origin: bottom center;
+            cursor: grab;
+            transition: transform 0.05s linear; /* 드래그 반응성을 위해 짧게 설정 */
+        }
+
+        .antenna-rod:active {
+            cursor: grabbing;
+        }
+
+        .antenna-rod::after {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: -6px;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle at 30% 30%, #ff4444, #880000);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+        }
+
+        #antenna-left { left: calc(50% - 15px); transform: rotate(-35deg); }
+        #antenna-right { left: calc(50% + 5px); transform: rotate(35deg); }
+
+        /* 브라운관 컨테이너 */
+        .crt-container {
+            position: relative;
+            flex: 3;
+            aspect-ratio: 4/3;
+            background: #000;
+            border-radius: 30px;
+            padding: 15px;
+            border: 15px solid #1a1a1a;
+            box-shadow: inset 0 0 50px rgba(0,0,0,1);
+        }
+
+        .screen-border {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 15%; 
+            box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.9);
+        }
+
+        /* 제어 패널 */
+        .control-panel {
+            flex: 1;
+            background: #1e1e1e;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            border: 2px solid #111;
+        }
+
+        .knob-container {
+            text-align: center;
+            width: 100%;
+        }
+
+        .dial {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 30% 30%, #444, #222);
+            border-radius: 50%;
+            border: 4px solid #111;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            --rotation: 0deg;
+            transform: rotate(var(--rotation));
+        }
+
+        .dial::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 15px;
+            background: #ff0000;
+            border-radius: 2px;
+            box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+        }
+
+        .dial:active {
+            transform: rotate(var(--rotation)) scale(0.92);
+        }
+
+        .speaker-grill {
+            width: 100%;
+            height: 100px;
+            background-image: radial-gradient(#000 20%, transparent 20%);
+            background-size: 8px 8px;
+            opacity: 0.4;
+        }
+
+        /* 시각 효과 */
+        .scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 10; pointer-events: none;
+        }
+
+        .vignette {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 50%, rgba(0, 0, 0, 0.8) 120%);
+            z-index: 11; pointer-events: none;
+        }
+
+        .squeeze { animation: squeezeAnim 0.8s forwards; }
+        @keyframes squeezeAnim {
+            0% { transform: scale(1, 1); }
+            50% { transform: scale(1, 0.01); filter: brightness(5); }
+            100% { transform: scale(0, 0); }
+        }
+
+        .flash { animation: flashAnim 0.1s; }
+        @keyframes flashAnim {
+            0% { filter: brightness(2); }
+            100% { filter: brightness(1); }
+        }
+
+        .osd-volume {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(0, 150, 0, 0.8);
+            color: white; padding: 2px 10px; font-size: 18px; z-index: 20; display: none;
+        }
+
+        .volume-bar {
+            height: 15px; background: #00ff00; display: inline-block;
+        }
+
+        #video-layer, #anomaly-layer {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+
+        #anomaly-layer {
+            position: absolute; top: 0; left: 0;
+            opacity: 0; mix-blend-mode: screen;
+        }
+
+        #noise-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url("https://media.giphy.com/media/oEI9uWUqWMrBK/giphy.gif");
+            opacity: 0.05; pointer-events: none; z-index: 15;
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="text-center mb-10">
+        <h1 class="text-4xl font-bold tracking-tighter mb-2 text-red-600 uppercase">Let Me Watch It</h1>
+        <p class="text-gray-500">안테나를 직접 잡고 휘둘러 주파수를 조율하세요.</p>
+    </div>
+
+    <!-- 메인 하드웨어 유닛 -->
+    <div class="tv-chassis" id="tv-hardware">
+        <!-- 상단 안테나 시스템 -->
+        <div class="antenna-system" id="antenna-trigger">
+            <div class="antenna-base"></div>
+            <div class="antenna-rod" id="antenna-left"></div>
+            <div class="antenna-rod" id="antenna-right"></div>
+        </div>
+
+        <!-- TV 화면부 -->
+        <div class="crt-container" id="screen-container">
+            <div class="screen-border" id="screen-border">
+                <div class="scanlines"></div>
+                <div class="vignette"></div>
+                <div id="noise-overlay"></div>
+
+                <div class="osd-volume" id="volume-ui">
+                    VOL <div class="volume-bar" id="volume-bar" style="width: 100px"></div>
+                </div>
+
+                <div class="screen-content" id="screen-main">
+                    <img id="video-layer" src="img/korean-lottery.jpg" alt="Lotto" />
+                    <img id="anomaly-layer" src="img/ghost-hand.jpg" alt="Anomaly" />
+                    <div class="instruction-overlay text-white font-bold" id="instruction-text" style="position:absolute; bottom:20px; z-index:30;">
+                        [ TV 프레임을 클릭하거나 SPACE를 눌러 시작 ]
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 우측 제어 패널 -->
+        <div class="control-panel" id="ui-panel">
+            <div class="knob-container">
+                <div class="text-[10px] text-gray-500 mb-2 font-sans tracking-widest">VOLUME</div>
+                <div class="dial" id="volume-knob"></div>
+            </div>
+            
+            <div class="knob-container">
+                <div class="text-[10px] text-gray-500 mb-2 font-sans tracking-widest">TUNING REF</div>
+                <div class="dial" style="width: 60px; height: 60px;" id="tuning-knob"></div>
+            </div>
+
+            <div class="speaker-grill"></div>
+            
+            <div class="text-[9px] text-gray-600 font-sans text-center leading-tight">
+                ANALOG RECEIVER<br>MODEL: GX-1994<br>S/N: 2025-ALT-CTRL
+            </div>
+        </div>
+    </div>
+
+    <!-- 하단 설명 패널 -->
+    <div class="debug-panel w-full max-w-[850px] mt-10 grid grid-cols-3 gap-6">
+        <div class="col-span-1 border-r border-gray-800 pr-4">
+            <h3 class="text-yellow-500 mb-2 font-bold text-sm">물리 조작 안내</h3>
+            <p class="text-[11px] text-gray-400 leading-relaxed">
+                1. <strong>안테나 조작:</strong> 상단 안테나를 마우스로 잡고 좌우로 드래그하여 주파수를 맞추세요.<br>
+                2. <strong>본체 타격:</strong> 회색 프레임을 클릭하여 화면을 복구하세요.<br>
+                3. <strong>볼륨 감소:</strong> 상단 노브를 연타하여 소음을 억제하세요.
+            </p>
+        </div>
+        <div class="col-span-2 flex flex-col justify-between">
+            <div class="flex justify-between items-center">
+                <div id="game-status" class="text-red-500 animate-pulse text-xs font-bold uppercase tracking-widest">Signal Status: Offline</div>
+                <button id="btn-audio-init" class="bg-red-900 hover:bg-red-700 text-white px-4 py-1 text-xs rounded transition border border-red-500">
+                    오디오 시스템 가동
+                </button>
+            </div>
+            <div class="bg-black/50 p-2 rounded text-[10px] text-gray-500 font-sans mt-2 italic">
+                * 안테나를 정교하게 움직여 심령 현상이 사라지는 지점을 찾아 유지해야 합니다.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GameEngine = {
+            state: {
+                current: "START",
+                mode: "TAP",
+                progress: 50,
+                volume: 50,
+                antennaAngle: 0,   // -180 ~ 180 범위로 계산
+                targetAngle: 90,
+                isDraggingAntenna: false,
+                waveStartTime: 0,
+                timer: null,
+                isAudioReady: false
+            },
+
+            audio: { noise: null, hitSynth: null, successSynth: null },
+
+            dom: {
+                chassis: document.getElementById("tv-hardware"),
+                screen: document.getElementById("screen-border"),
+                video: document.getElementById("video-layer"),
+                anomaly: document.getElementById("anomaly-layer"),
+                instruction: document.getElementById("instruction-text"),
+                status: document.getElementById("game-status"),
+                volUI: document.getElementById("volume-ui"),
+                volBar: document.getElementById("volume-bar"),
+                audioBtn: document.getElementById("btn-audio-init"),
+                volKnob: document.getElementById("volume-knob"),
+                tuneKnob: document.getElementById("tuning-knob"),
+                antennaLeft: document.getElementById("antenna-left"),
+                antennaRight: document.getElementById("antenna-right"),
+                antennaSystem: document.getElementById("antenna-trigger")
+            },
+
+            init() {
+                this.dom.audioBtn.addEventListener("click", () => this.initAudio());
+                
+                // 본체 타격 (프레임 클릭)
+                this.dom.chassis.addEventListener("mousedown", (e) => {
+                    if (e.target === this.dom.chassis || e.target.id === "screen-container") {
+                        this.handleHit();
+                    }
+                });
+
+                // 볼륨 노브
+                this.dom.volKnob.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    this.rotateKnob(this.dom.volKnob);
+                    if (this.state.current === "PLAYING" && this.state.mode === "VOLUME") {
+                        this.state.volume -= 15;
+                        this.applyVisualJuice(0.6);
+                    }
+                });
+
+                // 안테나 드래그 로직
+                const startDrag = (e) => {
+                    if (this.state.current === "START") return;
+                    this.state.isDraggingAntenna = true;
+                    this.handleAntennaMove(e);
+                };
+
+                const doDrag = (e) => {
+                    if (this.state.isDraggingAntenna) {
+                        this.handleAntennaMove(e);
+                    }
+                };
+
+                const stopDrag = () => {
+                    this.state.isDraggingAntenna = false;
+                };
+
+                this.dom.antennaLeft.addEventListener("mousedown", startDrag);
+                this.dom.antennaRight.addEventListener("mousedown", startDrag);
+                window.addEventListener("mousemove", doDrag);
+                window.addEventListener("mouseup", stopDrag);
+
+                // 키보드 지원
+                window.addEventListener("keydown", (e) => {
+                    if (this.state.current === "START" && e.code === "Space") {
+                        this.initAudio();
+                        this.start();
+                    } else if (this.state.current === "PLAYING") {
+                        if (e.code === "Space") this.handleHit();
+                        if (e.code === "ArrowDown" && this.state.mode === "VOLUME") {
+                            this.state.volume -= 10;
+                            this.rotateKnob(this.dom.volKnob);
+                        }
+                    }
+                });
+
+                this.updateAntennaVisual();
+            },
+
+            initAudio() {
+                if (this.state.isAudioReady) return;
+                Tone.start();
+                this.audio.noise = new Tone.Noise("white").toDestination();
+                this.audio.noise.volume.value = -30;
+                this.audio.hitSynth = new Tone.NoiseSynth().toDestination();
+                this.audio.hitSynth.volume.value = -12;
+                this.audio.successSynth = new Tone.MembraneSynth().toDestination();
+                this.state.isAudioReady = true;
+                this.dom.audioBtn.innerText = "LINK CONNECTED";
+                this.dom.audioBtn.classList.replace("bg-red-900", "bg-green-900");
+            },
+
+            start() {
+                this.state.current = "PLAYING";
+                this.dom.instruction.innerText = "";
+                this.dom.status.innerText = "MONITORING SIGNAL";
+                this.nextWave();
+            },
+
+            nextWave() {
+                this.state.progress = 60; 
+                this.state.volume = 50;
+                this.state.waveStartTime = Date.now();
+                
+                const modes = ["TAP", "VOLUME", "ANTENNA"];
+                this.state.mode = modes[Math.floor(Math.random() * modes.length)];
+                
+                this.dom.volUI.style.display = "none";
+                this.dom.anomaly.style.opacity = "0";
+
+                switch(this.state.mode) {
+                    case "TAP":
+                        this.dom.instruction.innerText = "신호 침식: 본체 프레임을 타격하세요";
+                        this.dom.anomaly.src = "img/ghost-face.jpg";
+                        break;
+                    case "VOLUME":
+                        this.dom.instruction.innerText = "강력한 노이즈: 볼륨 노브를 연타하세요";
+                        this.dom.volUI.style.display = "block";
+                        this.dom.anomaly.src = "img/noise-maker.jpg";
+                        break;
+                    case "ANTENNA":
+                        // 타겟 각도를 현재와 60~120도 차이나도록 설정
+                        let offset = (Math.random() > 0.5 ? 1 : -1) * (60 + Math.random() * 60);
+                        this.state.targetAngle = (this.state.antennaAngle + offset);
+                        // 범위를 -150 ~ 150도로 제한
+                        this.state.targetAngle = Math.max(-150, Math.min(150, this.state.targetAngle));
+                        this.dom.instruction.innerText = "주파수 이탈: 안테나를 직접 조정하세요";
+                        this.dom.anomaly.src = "img/another-broadcast.jpg";
+                        break;
+                }
+                
+                if (this.state.timer) clearInterval(this.state.timer);
+                this.state.timer = setInterval(() => this.update(), 50);
+            },
+
+            // 안테나 드래그 핸들러
+            handleAntennaMove(e) {
+                const rect = this.dom.chassis.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + 50; // 안테나 베이스 위치 대략 측정
+                
+                // 마우스 위치와 안테나 베이스 사이의 각도 계산
+                const dx = e.clientX - centerX;
+                const dy = e.clientY - centerY;
+                let angle = Math.atan2(dx, -dy) * (180 / Math.PI); // 위쪽이 0도
+                
+                // 조작 각도 제한 (-80 ~ 80도 정도가 자연스러움)
+                angle = Math.max(-90, Math.min(90, angle));
+                
+                this.state.antennaAngle = angle;
+                this.updateAntennaVisual();
+                
+                // 안테나 움직임에 따른 튜닝 노브 동기화 연출
+                this.dom.tuneKnob.style.setProperty('--rotation', `${angle * 2}deg`);
+
+                if (this.state.mode === "ANTENNA") {
+                    this.applyVisualJuice(0.05); // 미세한 진동 피드백
+                }
+            },
+
+            updateAntennaVisual() {
+                const baseAngle = this.state.antennaAngle;
+                // 왼쪽 안테나와 오른쪽 안테나가 V자 형태를 유지하며 함께 움직임
+                this.dom.antennaLeft.style.transform = `rotate(${baseAngle - 30}deg)`;
+                this.dom.antennaRight.style.transform = `rotate(${baseAngle + 30}deg)`;
+            },
+
+            update() {
+                if (this.state.current !== "PLAYING") return;
+
+                let visualOpacity = 0;
+
+                switch(this.state.mode) {
+                    case "TAP":
+                        this.state.progress += 0.8;
+                        visualOpacity = (this.state.progress / 100);
+                        this.dom.video.style.filter = `blur(${this.state.progress / 10}px) grayscale(${this.state.progress/120})`;
+                        break;
+
+                    case "VOLUME":
+                        this.state.volume += 1.4;
+                        this.dom.volBar.style.width = `${Math.max(0, this.state.volume) * 2}px`;
+                        if (this.state.isAudioReady) this.audio.noise.volume.value = -30 + (this.state.volume / 2);
+                        visualOpacity = (this.state.volume / 100);
+                        this.dom.video.style.filter = `contrast(${1 + (this.state.volume/80)}) brightness(${1 - (this.state.volume/200)})`;
+                        break;
+
+                    case "ANTENNA":
+                        // 주파수 차이 계산
+                        let diff = Math.abs(this.state.antennaAngle - this.state.targetAngle);
+                        // 판정 완화: 타겟 근처 15도 이내면 선명해지기 시작
+                        visualOpacity = Math.pow(Math.min(diff / 60, 1), 1.5);
+                        
+                        if (visualOpacity < 0.2) {
+                            this.state.progress -= 5.0; 
+                            this.dom.status.innerText = "SIGNAL LOCKING...";
+                        } else {
+                            this.state.progress += 0.3;
+                            this.dom.status.innerText = "SEARCHING...";
+                        }
+                        this.dom.video.style.filter = `contrast(${1.5 - visualOpacity}) brightness(${1.2 - visualOpacity/2})`;
+                        break;
+                }
+
+                this.dom.anomaly.style.opacity = Math.max(0, Math.min(1, visualOpacity)).toFixed(2);
+
+                if (Date.now() - this.state.waveStartTime > 1000) {
+                    if (this.state.progress >= 100 || this.state.volume >= 100) this.gameOver();
+                    else if (this.state.progress <= 0 || (this.state.mode === "VOLUME" && this.state.volume <= 0)) this.waveSuccess();
+                }
+            },
+
+            handleHit() {
+                if (this.state.current === "START") {
+                    this.initAudio();
+                    this.start();
+                    return;
+                }
+                if (this.state.current !== "PLAYING") return;
+                
+                if (this.state.mode === "TAP") {
+                    this.state.progress -= 18;
+                }
+                this.applyVisualJuice(1.4);
+            },
+
+            rotateKnob(el) {
+                const currentRot = parseInt(el.getAttribute('data-rot')) || 0;
+                const newRot = currentRot + 45;
+                el.style.setProperty('--rotation', `${newRot}deg`);
+                el.setAttribute('data-rot', newRot);
+                
+                if(this.state.isAudioReady) {
+                    const click = new Tone.MembraneSynth().toDestination();
+                    click.volume.value = -20;
+                    click.triggerAttackRelease("C1", "32n");
+                }
+            },
+
+            applyVisualJuice(intensity = 1) {
+                this.dom.screen.classList.add("flash");
+                setTimeout(() => this.dom.screen.classList.remove("flash"), 100);
+                
+                const shakeX = (Math.random() - 0.5) * 20 * intensity;
+                const shakeY = (Math.random() - 0.5) * 20 * intensity;
+                this.dom.chassis.style.transform = `translate(${shakeX}px, ${shakeY}px)`;
+                setTimeout(() => this.dom.chassis.style.transform = "translate(0,0)", 50);
+                
+                if (this.state.isAudioReady && intensity > 0.5) {
+                    this.audio.hitSynth.triggerAttackRelease("16n");
+                }
+            },
+
+            waveSuccess() {
+                clearInterval(this.state.timer);
+                this.state.current = "SUCCESS_WAIT";
+                this.dom.instruction.innerText = "채널 고정 성공";
+                this.dom.status.innerText = "SIGNAL RECOVERED";
+                this.dom.anomaly.style.opacity = "0";
+                if (this.state.isAudioReady) this.audio.successSynth.triggerAttackRelease("A3", "4n");
+                setTimeout(() => {
+                    this.state.current = "PLAYING";
+                    this.nextWave();
+                }, 1500);
+            },
+
+            gameOver() {
+                this.state.current = "LOSE";
+                clearInterval(this.state.timer);
+                this.dom.screen.classList.add("squeeze");
+                this.dom.instruction.innerText = "더 이상 당신을 보호할 수 없습니다.";
+                if (this.state.isAudioReady) {
+                    this.audio.noise.stop();
+                    this.audio.hitSynth.triggerAttackRelease("1s");
+                }
+                setTimeout(() => location.reload(), 5000);
+            }
+        };
+
+        window.onload = () => GameEngine.init();
+    </script>
+</body>
+</html>
