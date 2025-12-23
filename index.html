@@ -9,12 +9,12 @@
     
     <script class="injected-ffc2e83d85">
         const IMG_GEN_REPLACE_MAP = {
-            "1990s korean lottery broadcast announcer on old tv bright colors distorted analog video&aspect=4:3": "img/korean-lottery.jpg",
-            "creepy white ghost hands pressing against glass from inside horror glitch analog&aspect=4:3": "img/ghost-hand.jpg",
-            "korean lotto 645 ticket paper crumpled realistic with handwritten numbers&aspect=3:4": "img/lottery-paper.jpg",
-            "distorted terrifying pale face pressed against crt tv screen horror&aspect=4:3": "img/ghost-face.jpg",
-            "analog static glitch art with distorted screaming silhouette&aspect=4:3": "img/noise-maker.jpg",
-            "government warning psa screen about gambling addiction korean text boring blue background&aspect=4:3": "img/another-broadcast.jpg",
+            "1990s korean lottery broadcast announcer on old tv bright colors distorted analog video&aspect=4:3": "./korean-lottery.jpg",
+            "creepy white ghost hands pressing against glass from inside horror glitch analog&aspect=4:3": "./ghost-hand.jpg",
+            "korean lotto 645 ticket paper crumpled realistic with handwritten numbers&aspect=3:4": "./lottery-paper.jpg",
+            "distorted terrifying pale face pressed against crt tv screen horror&aspect=4:3": "./ghost-face.jpg",
+            "analog static glitch art with distorted screaming silhouette&aspect=4:3": "./noise-maker.jpg",
+            "government warning psa screen about gambling addiction korean text boring blue background&aspect=4:3": "./another-broadcast.jpg",
         };
         const MAY_HAVE_BACKGROUND_IMAGE = true;
     </script>
@@ -158,8 +158,8 @@
             </div>
 
             <div class="screen-content" id="screen-main">
-                <img id="video-layer" src="img/korean-lottery.jpg" alt="Lotto" />
-                <img id="anomaly-layer" src="img/ghost-hand.jpg" alt="Anomaly" />
+                <img id="video-layer" src="./korean-lottery.jpg" alt="Lotto" />
+                <img id="anomaly-layer" src="./ghost-hand.jpg" alt="Anomaly" />
 
                 <div class="instruction-overlay" id="instruction-text">
                     [ SPACE를 눌러 부팅 ]
@@ -266,18 +266,18 @@
                 switch(this.state.mode) {
                     case "TAP":
                         this.dom.instruction.innerText = "침식 발생: 화면을 때리세요 [SPACE]";
-                        this.dom.anomaly.src = "img/ghost-face.jpg";
+                        this.dom.anomaly.src = "./ghost-face.jpg";
                         break;
                     case "VOLUME":
                         this.dom.instruction.innerText = "잡음 감지: 볼륨을 줄이세요 [↓]";
                         this.dom.volUI.style.display = "block";
-                        this.dom.anomaly.src = "img/noise-maker.jpg";
+                        this.dom.anomaly.src = "./noise-maker.jpg";
                         break;
                     case "ANTENNA":
                         let offset = 120 + Math.random() * 120;
                         this.state.targetAngle = (this.state.antennaAngle + offset) % 360;
                         this.dom.instruction.innerText = "주파수 이탈: 안테나를 조율하세요 [WHEEL]";
-                        this.dom.anomaly.src = "img/another-broadcast.jpg";
+                        this.dom.anomaly.src = "./another-broadcast.jpg";
                         break;
                 }
                 
@@ -412,4 +412,5 @@
         window.onload = () => GameEngine.init();
     </script>
 </body>
+
 </html>
