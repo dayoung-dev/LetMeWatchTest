@@ -274,8 +274,8 @@
                 </div>
 
                 <div class="screen-content" id="screen-main">
-                    <img id="video-layer" src="img/korean-lottery.jpg" alt="Lotto" />
-                    <img id="anomaly-layer" src="img/ghost-hand.jpg" alt="Anomaly" />
+                    <img id="video-layer" src="./korean-lottery.jpg" alt="Lotto" />
+                    <img id="anomaly-layer" src="./ghost-hand.jpg" alt="Anomaly" />
                     <div class="instruction-overlay text-white font-bold" id="instruction-text" style="position:absolute; bottom:20px; z-index:30;">
                         [ TV 프레임을 클릭하거나 SPACE를 눌러 시작 ]
                     </div>
@@ -453,12 +453,12 @@
                 switch(this.state.mode) {
                     case "TAP":
                         this.dom.instruction.innerText = "신호 침식: 본체 프레임을 타격하세요";
-                        this.dom.anomaly.src = "img/ghost-face.jpg";
+                        this.dom.anomaly.src = "./ghost-face.jpg";
                         break;
                     case "VOLUME":
                         this.dom.instruction.innerText = "강력한 노이즈: 볼륨 노브를 연타하세요";
                         this.dom.volUI.style.display = "block";
-                        this.dom.anomaly.src = "img/noise-maker.jpg";
+                        this.dom.anomaly.src = "./noise-maker.jpg";
                         break;
                     case "ANTENNA":
                         // 타겟 각도를 현재와 60~120도 차이나도록 설정
@@ -467,7 +467,7 @@
                         // 범위를 -150 ~ 150도로 제한
                         this.state.targetAngle = Math.max(-150, Math.min(150, this.state.targetAngle));
                         this.dom.instruction.innerText = "주파수 이탈: 안테나를 직접 조정하세요";
-                        this.dom.anomaly.src = "img/another-broadcast.jpg";
+                        this.dom.anomaly.src = "./another-broadcast.jpg";
                         break;
                 }
                 
@@ -624,3 +624,4 @@
 </body>
 
 </html>
+
